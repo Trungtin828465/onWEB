@@ -372,9 +372,13 @@ dfn, cite, em, i {
   font-size: 120%;
   line-height: 1.7em;
 }
+.text-danger{
+    color:red;
+    font-size:12px;
+}
 .text-lead strong {
-  font-size: 115%;
-  font-weight: 500;
+    font-size: 115%;
+    font-weight: 500;
 }
 .text-muted {
   color: var(--primary-color);

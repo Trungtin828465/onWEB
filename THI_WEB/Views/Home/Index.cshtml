@@ -97,20 +97,21 @@
 
         </ul>
         <script>
-            async function sendImageName(imageName) {
-                try {
-                    const response = await fetch('/Home/XuHuong', {
-                        method: 'POST',
-                        body: new URLSearchParams({ imageName }),
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                    });
-                    const result = await response.json();
-                    window.location.href = `/Home/Index`;
-                } catch (error) {
-                    console.error("Error: ", error);
-                }
+            function sendImageName(imageName) {
+                $.ajax({
+                    url: '/Home/XuHuong',
+                    type: 'POST',
+                    data: { imageName: imageName },
+                    success: function (result) {
+                        window.location.href = '/Home/Index';
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error: ", error);
+                    }
+                });
             }
         </script>
+
         <div class="tab-content">
             <div id="all" data-tab-content class="active">
                 <div class="row d-flex flex-wrap">
@@ -122,7 +123,7 @@
 
                                 <div class="image-holder">
                                     <a href="@Url.Action("Chitiet", "Home", new{ id = item.SanphamID })"><img src="~/Content/images/selling-products1.jpg" alt="Books" class="product-image"></a>
-                                 
+
                                 </div>
 
                                 <div class="cart-concern">
@@ -158,7 +159,8 @@
                                 <div class="image-holder">
                                     <a href="@Url.Action("Chitiet", "Home", new{ id = item.SanphamID })">
                                         <img src="~/Content/images/selling-products1.jpg" alt="Books" class="product-image">
-                                    </a>  </div>
+                                    </a>
+                                </div>
 
                                 <div class="cart-concern">
                                     <div class="cart-button d-flex justify-content-between align-items-center">

@@ -20,7 +20,6 @@ namespace THI_WEB.Controllers
         public ActionResult XuHuong(string imageName)
         {
             Session["ImageName"] = imageName;
-
             return Json(new { imageName = imageName });
         }
         public ActionResult Index()
@@ -31,16 +30,10 @@ namespace THI_WEB.Controllers
             var sanPham = db.Sanphams.ToList();
             if (!string.IsNullOrEmpty(tenLoaiSanPham))
             {
-                var checkLoc = db.Sanphams.Where(p => p.PhanLoaiSanPham.TenPhanLoai == tenLoaiSanPham)
-
-                  .ToList();
+                var checkLoc = db.Sanphams.Where(p => p.PhanLoaiSanPham.TenPhanLoai == tenLoaiSanPham).ToList();
                 ViewBag.checkLoc = checkLoc;
-
             }
-
-
             ViewBag.sanPham = sanPham;
-        
             return View(phanLoaiSanPhams);
         }
 
@@ -73,31 +66,29 @@ namespace THI_WEB.Controllers
 
             var sp = db.Sanphams.Where(oi => oi.SanphamID == id)
                 .FirstOrDefault();
-            var LoaiSp = db.PhanLoaiSanPhams.ToList();
-            ViewBag.Loaisp = LoaiSp;
+          
+            ViewBag.category = new SelectList(db.PhanLoaiSanPhams.ToList(), "PhanLoaiSanPhamID", "TenPhanLoai");
             return View(sp);
         }
         [HttpPost]
         public ActionResult Edit(Sanpham id, HttpPostedFileBase IMG)
         {
-            // Tạo đối tượng db context
-            using (var db = new QuanLyBanQuanAoEntities())  // Đảm bảo context được khởi tạo đúng
+            if (ModelState.IsValid)
             {
-                // Tìm sản phẩm theo SanphamID
-                var sp = db.Sanphams.FirstOrDefault(oi => oi.SanphamID == id.SanphamID);
-
+                var sp = db.Sanphams.Find(id.SanphamID);
                 if (sp == null)
                 {
-                    return HttpNotFound(); // Nếu không tìm thấy sản phẩm, trả về lỗi
+                    return HttpNotFound();
                 }
 
-                // Kiểm tra nếu model không hợp lệ
-                if (!ModelState.IsValid)
-                {
-                    return View(id);
-                }
+              
+                sp.TenSanpham = id.TenSanpham;
+                sp.MoTa = id.MoTa;
+                sp.Gia = id.Gia;
+                sp.TrangThai = id.TrangThai;
+                sp.NoiBat = id.NoiBat;
+                sp.PhanLoaiSanPhamID = id.PhanLoaiSanPhamID;
 
-                // Xử lý hình ảnh (nếu có)
                 if (IMG != null && IMG.ContentLength > 0)
                 {
                     string fileName = Path.GetFileName(IMG.FileName);
@@ -107,66 +98,47 @@ namespace THI_WEB.Controllers
                     {
                         string filePath = Path.Combine(Server.MapPath("~/Content/images/"), fileName);
                         IMG.SaveAs(filePath);
-                        sp.AnhDaiDien = fileName; // Cập nhật ảnh đại diện
+                        sp.AnhDaiDien = fileName;
                     }
                     else
                     {
-                        ModelState.AddModelError("Img", "Chỉ hỗ trợ các định dạng hình ảnh .jpg và .png.");
+                        ModelState.AddModelError("IMG", "Chỉ hỗ trợ các định dạng hình ảnh .jpg và .png.");
                     }
                 }
-                else
-                {
-                    ModelState.AddModelError("Img", "Vui lòng chọn một tệp hình ảnh.");
-                }
 
-                // Kiểm tra loại sản phẩm hợp lệ
-                var LoaiSp = db.PhanLoaiSanPhams.Any(oi => oi.PhanLoaiSanPhamID == id.PhanLoaiSanPhamID);
-                if (!LoaiSp)
-                {
-                    ModelState.AddModelError("SanphamID", "Loại sản phẩm không hợp lệ.");
-                }
+                db.Sanphams.AddOrUpdate(sp);
+                db.SaveChanges();
 
-                // Cập nhật thông tin sản phẩm
-                sp.MoTa = id.MoTa;
-                sp.TenSanpham = id.TenSanpham;
-                sp.PhanLoaiSanPhamID = id.PhanLoaiSanPhamID; // Cập nhật đúng ID loại sản phẩm
-                sp.Gia = id.Gia;
-
-                // Cập nhật sản phẩm trong cơ sở dữ liệu
-                db.Entry(sp).State = EntityState.Modified; // Cập nhật đối tượng đã có
-                db.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
-
-                return RedirectToAction("Index"); // Điều hướng về trang Index sau khi lưu thành công
+                return RedirectToAction("Index");
             }
+
+            ViewBag.category = new SelectList(db.PhanLoaiSanPhams.ToList(), "PhanLoaiSanPhamID", "TenPhanLoai");
+            return View(id);
         }
+
 
 
         public ActionResult Create()
         {
             QuanLyBanQuanAoEntities db = new QuanLyBanQuanAoEntities();
             var LoaiSp = db.PhanLoaiSanPhams.ToList();
-            ViewBag.Loaisp = LoaiSp;
+            ViewBag.category = new SelectList(db.PhanLoaiSanPhams.ToList(), "PhanLoaiSanPhamID", "TenPhanLoai");
             return View();
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Create(Sanpham sp, HttpPostedFileBase Img)
         {
            
             if (ModelState.IsValid)
             {
                 // Kiểm tra các trường bắt buộc
-                if (string.IsNullOrEmpty(sp.TenSanpham))
+                if (string.IsNullOrEmpty(sp.TenSanpham)==true)
                 {
                     ModelState.AddModelError("TenSanpham", "Họ tên không được để trống.");
                 }
-                string check = @"^[a-zA-Z].*03.*$";
-                if (!Regex.IsMatch(sp.TenSanpham, check))
-                {
-                    ModelState.AddModelError("TenSanpham", "Họ tên phải bắt đầu bằng một chữ cái và 03.");
-                }
+               
 
-                if ( !Regex.IsMatch(sp.TenSanpham, @"^[a-zA-Z]"))
+                else if ( !Regex.IsMatch(sp.TenSanpham, @"^[a-zA-Z]"))
                 {
                     ModelState.AddModelError("TenSanpham", "Họ tên phải bắt đầu bằng một chữ cái.");
                 }
@@ -189,8 +161,7 @@ namespace THI_WEB.Controllers
 
 
                 
-                var LoaiSp = db.PhanLoaiSanPhams.Any(oi=>oi.PhanLoaiSanPhamID==sp.SanphamID);
-                if (!LoaiSp) { ModelState.AddModelError("SanphamID", "Loai sp khong dc trong"); }
+               
                 if (Img != null && Img.ContentLength > 0)
                 {
                     string fileName = Path.GetFileName(Img.FileName);
@@ -213,14 +184,20 @@ namespace THI_WEB.Controllers
                 }
                 if (!ModelState.IsValid)
                 {
-                    return View(sp); // Nếu có lỗi, trả về view với thông tin đã nhập.
+                    // Đổ lại ViewBag.category khi có lỗi
+                    ViewBag.category = new SelectList(db.PhanLoaiSanPhams.ToList(), "PhanLoaiSanPhamID", "TenPhanLoai");
+                    return View(sp);
                 }
                 db.Sanphams.Add(sp);
                 db.SaveChanges();
+             
                 return RedirectToAction("Index");
 
             }
+            ViewBag.category = new SelectList(db.PhanLoaiSanPhams.ToList(), "PhanLoaiSanPhamID", "TenPhanLoai");
+
             return View(sp);
         }
+     
     }
 }

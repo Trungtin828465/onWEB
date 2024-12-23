@@ -22,6 +22,7 @@ namespace THI_WEB.Models
         }
     
         public int SanphamID { get; set; }
+
         public string TenSanpham { get; set; }
         public string MoTa { get; set; }
         public decimal Gia { get; set; }
