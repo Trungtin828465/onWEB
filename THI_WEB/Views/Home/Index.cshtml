@@ -96,6 +96,7 @@
 
 
         </ul>
+       
         <script>
             function sendImageName(imageName) {
                 $.ajax({
@@ -104,9 +105,6 @@
                     data: { imageName: imageName },
                     success: function (result) {
                         window.location.href = '/Home/Index';
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error: ", error);
                     }
                 });
             }
@@ -117,7 +115,7 @@
                 <div class="row d-flex flex-wrap">
                     @if (ViewBag.checkLoc != null)
                     {
-                        foreach (var item in loc)
+                        foreach (var item in ViewBag.checkLoc)
                         {
                             <div class="product-item col-lg-3 col-md-6 col-sm-6">
 

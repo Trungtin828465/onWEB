@@ -7,13 +7,9 @@
 
 <h2>Create</h2>
 
-<style>
-    .form-control {
-        width: 200px
-    }
-</style>
 @using (Html.BeginForm("Create", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
+    
     @Html.AntiForgeryToken()
 
     <div class="form-horizontal">
@@ -48,7 +44,7 @@
         <div class="form-group">
             @Html.LabelFor(model => model.AnhDaiDien, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                <input type="file" id="ImgCustomer" name="Img" class="form-control"  />
+                <input type="file" id="AnhDaiDien" name="AnhDaiDien" class="form-control" required />
                 @Html.ValidationMessageFor(model => model.AnhDaiDien, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -58,6 +54,23 @@
             <div class="col-md-10">
                 @Html.EditorFor(model => model.NoiBat, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.NoiBat, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TrangThai, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.TrangThai, new SelectList
+                    (new List<SelectListItem>
+                    {
+                        new SelectListItem {Value = "1", Text = "Done"},
+                         new SelectListItem {Value = "0", Text = "NOT"}
+
+
+                    }, "Value", "Text"),
+                    "STATUS", new { @class = "form-control" 
+                })
+                @Html.ValidationMessageFor(model => model.TrangThai, "", new { @class = "text-danger" })
             </div>
         </div>
 
@@ -74,13 +87,6 @@
             </div>
         </div>
 
-        @*<div class="form-group">
-                @Html.LabelFor(model => model.PhanLoaiSanPhamID, "PhanLoaiSanPhamID", htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.DropDownList("PhanLoaiSanPhamID", null, htmlAttributes: new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.PhanLoaiSanPhamID, "", new { @class = "text-danger" })
-                </div>
-            </div>*@
 
 
         <div class="form-group">
